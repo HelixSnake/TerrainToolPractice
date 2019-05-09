@@ -1,82 +1,151 @@
-﻿// Each #kernel tells which function to compile; you can have many kernels
+﻿
+// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel Clear
+#pragma kernel RandomTest
 #pragma kernel StartCorners
 #pragma kernel Diamond
-#pragma kernel SquareMiddle
+#pragma kernel Square
 #pragma kernel SquareLeftSide
-#pragma kernel SquareUpSide
+#pragma kernel SquareTopSide
 #pragma kernel SquareRightSide
-#pragma kernel SquareDownSide
+#pragma kernel SquareBottomSide
+
+// Visit https://en.wikipedia.org/wiki/Diamond-square_algorithm if you need a visual aid on what this shader is doing!
 
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 Texture2D<float> read;
 RWTexture2D<float> write;
+uniform uint randomSeed;
+uniform uint widthMinusOne;
+uniform uint iteration;
+uniform float variation;
+
+inline float rand_float(uint input)
+{
+	return frac(sin(dot(float2(input / 65536.0, input / 65536.0), float2(12.9898, 78.233)))*43758.5453123);
+}
+
+inline float pixel_to_seed(uint x, uint y)
+{
+	return randomSeed + x + widthMinusOne * y;
+}
+
+inline float rand_offset_with_variation(uint x, uint y)
+{
+	return (rand_float(pixel_to_seed(x, y)) - 0.5) * variation;
+}
+
+inline float sample_read(uint x, uint y)
+{
+	return read[uint2(x, y)];
+}
 
 [numthreads(8, 8, 1)]
 void Clear(uint3 id : SV_DispatchThreadID)
 {
-	// TODO: insert actual code here!
-
 	write[id.xy] = 0.5;
 }
 
-[numthreads(2,2,1)]
+[numthreads(8, 8, 1)]
+void RandomTest(uint3 id : SV_DispatchThreadID)
+{
+	write[id.xy] = rand_float(pixel_to_seed(id.x, id.y));
+}
+
+[numthreads(1,1,1)]
 void StartCorners (uint3 id : SV_DispatchThreadID)
 {
     // TODO: insert actual code here!
 
-	write[id.xy] = 1.0;
+	write[uint2(0,0)] = rand_float(pixel_to_seed(0,0));
+	write[uint2(0, widthMinusOne)] = rand_float(pixel_to_seed(0, widthMinusOne));
+	write[uint2(widthMinusOne, 0)] = rand_float(pixel_to_seed(widthMinusOne, 0));
+	write[uint2(widthMinusOne, widthMinusOne)] = rand_float(pixel_to_seed(widthMinusOne, widthMinusOne));
 }
 
 [numthreads(8, 8, 1)]
 void Diamond(uint3 id : SV_DispatchThreadID)
 {
-	// TODO: insert actual code here!
-
-	write[id.xy] = 1.0;
+	int units = widthMinusOne / (1 << iteration);
+	uint2 newXY = uint2(id.x * units * 2 + units, id.y * units * 2 + units);
+	float average = 0.0;
+	average += sample_read(newXY.x - units, newXY.y - units);
+	average += sample_read(newXY.x + units, newXY.y - units);
+	average += sample_read(newXY.x - units, newXY.y + units);
+	average += sample_read(newXY.x + units, newXY.y + units);
+	average /= 4.0;
+	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
 }
 
 
-[numthreads(8, 8, 1)]
-void SquareMiddle(uint3 id : SV_DispatchThreadID)
+[numthreads(4, 8, 1)]
+void Square(uint3 id : SV_DispatchThreadID) 
 {
-	// TODO: insert actual code here!
-
-	write[id.xy] = 1.0;
+	// To achieve a "diamond pattern" we multiply the x value by 2 and then add 1 to the x value for every other row
+	int units = widthMinusOne / (1 << iteration);
+	int rowShift = (id.y + 1) % 2;
+	uint2 newXY = uint2(id.x * units * 2 + units * rowShift, id.y * units);
+	float average = 0.0;
+	average += sample_read(newXY.x - units, newXY.y);
+	average += sample_read(newXY.x + units, newXY.y);
+	average += sample_read(newXY.x, newXY.y - units);
+	average += sample_read(newXY.x, newXY.y + units);
+	average /= 4.0;
+	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
 }
 
 
-[numthreads(1, 64, 1)]
+[numthreads(1, 8, 1)]
 void SquareLeftSide(uint3 id : SV_DispatchThreadID)
 {
-	// TODO: insert actual code here!
-
-	write[id.xy] = 1.0;
+	int units = widthMinusOne / (1 << iteration);
+	uint2 newXY = uint2(0, id.y * units * 2 + units);
+	float average = 0.0;
+	average += sample_read(newXY.x + units, newXY.y);
+	average += sample_read(newXY.x, newXY.y - units);
+	average += sample_read(newXY.x, newXY.y + units);
+	average /= 3.0;
+	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
 }
 
 
-[numthreads(64, 1, 1)]
-void SquareUpSide(uint3 id : SV_DispatchThreadID)
+[numthreads(8, 1, 1)]
+void SquareTopSide(uint3 id : SV_DispatchThreadID)
 {
-	// TODO: insert actual code here!
-
-	write[id.xy] = 1.0;
+	int units = widthMinusOne / (1 << iteration);
+	uint2 newXY = uint2(id.x * units * 2 + units, 0);
+	float average = 0.0;
+	average += sample_read(newXY.x - units, newXY.y);
+	average += sample_read(newXY.x + units, newXY.y);
+	average += sample_read(newXY.x, newXY.y + units);
+	average /= 3.0;
+	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
 }
 
 
-[numthreads(1, 64, 1)]
+[numthreads(1, 8, 1)]
 void SquareRightSide(uint3 id : SV_DispatchThreadID)
 {
-	// TODO: insert actual code here!
-
-	write[id.xy] = 1.0;
+	int units = widthMinusOne / (1 << iteration);
+	uint2 newXY = uint2(widthMinusOne, id.y * units * 2 + units);
+	float average = 0.0;
+	average += sample_read(newXY.x - units, newXY.y);
+	average += sample_read(newXY.x, newXY.y - units);
+	average += sample_read(newXY.x, newXY.y + units);
+	average /= 3.0;
+	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
 }
 
-[numthreads(64, 1, 1)]
-void SquareDownSide(uint3 id : SV_DispatchThreadID)
+[numthreads(8, 1, 1)]
+void SquareBottomSide(uint3 id : SV_DispatchThreadID)
 {
-	// TODO: insert actual code here!
-
-	write[id.xy] = 1.0;
+	int units = widthMinusOne / (1 << iteration);
+	uint2 newXY = uint2(id.x * units * 2 + units, widthMinusOne);
+	float average = 0.0;
+	average += sample_read(newXY.x - units, newXY.y);
+	average += sample_read(newXY.x + units, newXY.y);
+	average += sample_read(newXY.x, newXY.y - units);
+	average /= 3.0;
+	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
 }

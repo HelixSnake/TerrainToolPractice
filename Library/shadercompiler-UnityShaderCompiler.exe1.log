@@ -1,8 +1,95 @@
 Base path: C:/Program Files/Unity/Hub/Editor/2019.1.1f1/Editor/Data
 Cmd: initializeCompiler
-Cmd: compileSnippet
-  api=4 type=0 insize=158581 outsize=1366 kw=UNITY_PASS_FORWARDBASE DIRECTIONAL DIRLIGHTMAP_COMBINED DYNAMICLIGHTMAP_ON pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
 Cmd: compileComputeKernel
-  api=4 insize=420 outsize=441 ok=1
+  api=4 insize=2113 outsize=289 ok=1
 Cmd: compileComputeKernel
-  api=4 insize=1604 outsize=293 ok=1
+  api=4 insize=2142 outsize=289 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2142 outsize=297 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=1930 outsize=633 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(21): incorrect number of arguments to numeric-type constructor
+  api=4 insize=1923 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=1948 outsize=297 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=1960 outsize=661 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(21): Illegal character in shader file
+  api=4 insize=1953 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(21): Illegal character in shader file
+  api=4 insize=1951 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(21): Illegal character in shader file
+  api=4 insize=1952 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=1950 outsize=293 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(41): invalid type for index - index must be a scalar, or a vector with the correct number of dimensions
+  error: 1 plat 4 at SquareDiamondRandomFractal.compute(41): comma expression used where a vector constructor may have been intended
+  api=4 insize=1948 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=1955 outsize=661 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2083 outsize=661 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2091 outsize=293 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2091 outsize=297 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2179 outsize=297 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(26): undeclared identifier 'textureWidth'
+  api=4 insize=2259 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 1 plat 4 at SquareDiamondRandomFractal.compute(38): 'pixel_to_seed': implicit truncation of vector type
+  api=4 insize=2260 outsize=289 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2330 outsize=297 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2355 outsize=293 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2321 outsize=293 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2347 outsize=665 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(59): undeclared identifier 'iterations'
+  api=4 insize=2658 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(62): 'tex2D': no matching 2 parameter intrinsic function; Possible intrinsic functions are: tex2D(sampler2D, float2|half2|min10float2|min16float2) tex2D(sampler2D, float2|half2|min10float2|min16float2, float2|half2|min10float2|min16float2, float2|half2|min10float2|min16float2)
+  api=4 insize=2657 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(37): syntax error: unexpected token '}'
+  api=4 insize=3092 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=3093 outsize=289 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at SquareDiamondRandomFractal.compute(36): implicit truncation of vector type
+  api=4 insize=3071 outsize=289 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(36): undeclared identifier 'tex2Dd'
+  api=4 insize=3072 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 1 plat 4 at SquareDiamondRandomFractal.compute(36): implicit truncation of vector type
+  api=4 insize=3071 outsize=297 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3098 outsize=289 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3104 outsize=1313 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(34): unrecognized identifier 'rand_offset_with_variation'
+  api=4 insize=3219 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(37): syntax error: unexpected token '}'
+  error: 2 plat 4 at SquareDiamondRandomFractal.compute(74): undeclared identifier 'sample_read'
+  api=4 insize=3225 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=3642 outsize=297 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4912 outsize=1345 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5100 outsize=1345 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4914 outsize=1345 ok=1
