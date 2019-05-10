@@ -63,6 +63,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\TerrainTools\TerrainToolDiamondFractal.cs" />
+    <Compile Include="Assets\Scripts\TerrainTools\TerrainToolPaintLimits.cs" />
+    <None Include="Assets\Scripts\TerrainTools\Shaders\PaintWithLimits.shader" />
+    <None Include="Assets\Shaders\StandardWithSnow.shader" />
     <None Include="Assets\Resources\SquareDiamondRandomFractal.compute" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>E:/UnityPractice/Terrain Practice/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>

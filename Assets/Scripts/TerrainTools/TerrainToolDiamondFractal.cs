@@ -40,7 +40,7 @@ namespace UnityEditor.Experimental.TerrainAPI
 
         public override string GetDesc()
         {
-            return "TODO: Create description after tool has been created";
+            return "After generating your fractal, click to stamp it";
         }
         public override void OnSceneGUI(Terrain terrain, IOnSceneGUI editContext)
         {
