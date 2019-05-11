@@ -20,6 +20,8 @@ uniform uint randomSeed;
 uniform uint widthMinusOne;
 uniform uint iteration;
 uniform float variation;
+uniform bool keepEdges;
+uniform float fitExistingTerrain;
 
 inline float rand_float(uint input)
 {
@@ -37,14 +39,27 @@ inline float average3(float a, float b, float c)
 	return (max(max(a, b), c) + min(min(a, b), c)) / 2.0;
 }
 
-inline float pixel_to_seed(uint x, uint y)
+inline uint pixel_to_seed(uint x, uint y)
 {
 	return randomSeed + x + widthMinusOne * y;
 }
 
 inline float rand_offset_with_variation(uint x, uint y)
 {
-	return (rand_float(pixel_to_seed(x, y)) - 0.5) * variation;
+		return (rand_float(pixel_to_seed(x, y)) - 0.5) * variation;
+}
+
+inline float rand_offset_with_variation_and_tendency(uint x, uint y, float diff)
+{
+	float rand = rand_float(pixel_to_seed(x, y)) - 0.5;
+	rand *= variation;
+	float diffClamped = clamp(diff, -0.5f * variation, 0.5f * variation); // cap maximum diff to 0.5
+	float currentFit = (1 - pow(fitExistingTerrain, iteration));
+	//float currentFit = 0;
+	//rand = diff > 0 ? max(diffClamped - currentFit, rand) : min(diffClamped + currentFit, rand);
+	rand = clamp(rand, diffClamped - currentFit, diffClamped + currentFit);
+	//rand = diffClamped;
+	return rand;
 }
 
 inline float sample_read(uint x, uint y)
@@ -67,12 +82,13 @@ void RandomTest(uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void StartCorners (uint3 id : SV_DispatchThreadID)
 {
-    // TODO: insert actual code here!
-
-	write[uint2(0,0)] = rand_float(pixel_to_seed(0,0));
-	write[uint2(0, widthMinusOne)] = rand_float(pixel_to_seed(0, widthMinusOne));
-	write[uint2(widthMinusOne, 0)] = rand_float(pixel_to_seed(widthMinusOne, 0));
-	write[uint2(widthMinusOne, widthMinusOne)] = rand_float(pixel_to_seed(widthMinusOne, widthMinusOne));
+	if (!keepEdges)
+	{
+		write[uint2(0, 0)] = rand_float(pixel_to_seed(0, 0));
+		write[uint2(0, widthMinusOne)] = rand_float(pixel_to_seed(0, widthMinusOne));
+		write[uint2(widthMinusOne, 0)] = rand_float(pixel_to_seed(widthMinusOne, 0));
+		write[uint2(widthMinusOne, widthMinusOne)] = rand_float(pixel_to_seed(widthMinusOne, widthMinusOne));
+	}
 }
 
 [numthreads(8, 8, 1)]
@@ -80,8 +96,13 @@ void Diamond(uint3 id : SV_DispatchThreadID)
 {
 	int units = widthMinusOne / (1 << iteration);
 	uint2 newXY = uint2(id.x * units * 2 + units, id.y * units * 2 + units);
-	float average = average4(sample_read(newXY.x - units, newXY.y - units), sample_read(newXY.x + units, newXY.y - units), sample_read(newXY.x - units, newXY.y + units), sample_read(newXY.x + units, newXY.y + units));
-	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
+	float average = average4(sample_read(newXY.x - units, newXY.y - units), \
+							sample_read(newXY.x + units, newXY.y - units), \
+							sample_read(newXY.x - units, newXY.y + units), \
+							sample_read(newXY.x + units, newXY.y + units));
+
+	float target = average + rand_offset_with_variation_and_tendency(newXY.x, newXY.y, read[newXY] - average);
+	write[newXY] = target;
 }
 
 
@@ -92,8 +113,13 @@ void Square(uint3 id : SV_DispatchThreadID)
 	int units = widthMinusOne / (1 << iteration);
 	int rowShift = (id.y + 1) % 2;
 	uint2 newXY = uint2(id.x * units * 2 + units * rowShift, id.y * units);
-	float average = average4(sample_read(newXY.x - units, newXY.y), sample_read(newXY.x + units, newXY.y), sample_read(newXY.x, newXY.y - units), sample_read(newXY.x, newXY.y + units));
-	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
+	float average = average4(sample_read(newXY.x - units, newXY.y), \
+							sample_read(newXY.x + units, newXY.y), \
+							sample_read(newXY.x, newXY.y - units), \
+							sample_read(newXY.x, newXY.y + units));
+
+	float target = average + rand_offset_with_variation_and_tendency(newXY.x, newXY.y, read[newXY] - average);
+	write[newXY] = target;
 }
 
 
@@ -102,8 +128,17 @@ void SquareLeftSide(uint3 id : SV_DispatchThreadID)
 {
 	int units = widthMinusOne / (1 << iteration);
 	uint2 newXY = uint2(0, id.y * units * 2 + units);
-	float average = average3(sample_read(newXY.x + units, newXY.y), sample_read(newXY.x, newXY.y - units), sample_read(newXY.x, newXY.y + units));
-	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
+	if (keepEdges)
+	{
+		write[newXY] = read[newXY];
+	}
+	else
+	{
+		float average = average3(sample_read(newXY.x + units, newXY.y), \
+			sample_read(newXY.x, newXY.y - units), \
+			sample_read(newXY.x, newXY.y + units));
+		write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
+	}
 }
 
 
@@ -112,8 +147,17 @@ void SquareTopSide(uint3 id : SV_DispatchThreadID)
 {
 	int units = widthMinusOne / (1 << iteration);
 	uint2 newXY = uint2(id.x * units * 2 + units, 0);
-	float average = average3(sample_read(newXY.x - units, newXY.y), sample_read(newXY.x + units, newXY.y), sample_read(newXY.x, newXY.y + units));
-	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
+	if (keepEdges)
+	{
+		write[newXY] = read[newXY];
+	}
+	else
+	{
+		float average = average3(sample_read(newXY.x - units, newXY.y), \
+			sample_read(newXY.x + units, newXY.y), \
+			sample_read(newXY.x, newXY.y + units));
+		write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
+	}
 }
 
 
@@ -122,8 +166,17 @@ void SquareRightSide(uint3 id : SV_DispatchThreadID)
 {
 	int units = widthMinusOne / (1 << iteration);
 	uint2 newXY = uint2(widthMinusOne, id.y * units * 2 + units);
-	float average = average3(sample_read(newXY.x - units, newXY.y), sample_read(newXY.x, newXY.y - units), sample_read(newXY.x, newXY.y + units));
-	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
+	if (keepEdges)
+	{
+		write[newXY] = read[newXY];
+	}
+	else
+	{
+		float average = average3(sample_read(newXY.x - units, newXY.y), \
+			sample_read(newXY.x, newXY.y - units), \
+			sample_read(newXY.x, newXY.y + units));
+		write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
+	}
 }
 
 [numthreads(8, 1, 1)]
@@ -131,6 +184,15 @@ void SquareBottomSide(uint3 id : SV_DispatchThreadID)
 {
 	int units = widthMinusOne / (1 << iteration);
 	uint2 newXY = uint2(id.x * units * 2 + units, widthMinusOne);
-	float average = average3(sample_read(newXY.x - units, newXY.y), sample_read(newXY.x + units, newXY.y), sample_read(newXY.x, newXY.y - units));
-	write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
+	if (keepEdges)
+	{
+		write[newXY] = read[newXY];
+	}
+	else
+	{
+		float average = average3(sample_read(newXY.x - units, newXY.y), \
+			sample_read(newXY.x + units, newXY.y), \
+			sample_read(newXY.x, newXY.y - units));
+		write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
+	}
 }

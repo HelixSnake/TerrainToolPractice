@@ -93,7 +93,7 @@ namespace UnityEditor.Experimental.TerrainAPI
             mat.SetTexture("_TerrainHeights", heightsContext.sourceRenderTexture);
             mat.SetVector("_BrushParams", brushParams);
             mat.SetVector("_BrushParams2", brushParams2);
-            mat.SetFloat("_TerrainMaxHeight", terrain.terrainData.heightmapHeight);
+            mat.SetFloat("_TerrainMaxHeight", terrain.terrainData.size.y);
 
             TerrainPaintUtility.SetupTerrainToolMaterialProperties(paintContext, brushXform, mat);
 
