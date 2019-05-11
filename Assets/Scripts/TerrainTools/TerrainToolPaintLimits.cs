@@ -9,14 +9,14 @@ namespace UnityEditor.Experimental.TerrainAPI
     public class TerrainToolPaintLimits : TerrainPaintTool<TerrainToolPaintLimits>
     {
 
-        float _minHeight;
-        float _maxHeight;
-        float _minHeightFalloff;
-        float _maxHeightFalloff;
-        float _minAngle;
-        float _maxAngle;
-        float _minAngleFalloff;
-        float _maxAngleFalloff;
+        float _minHeight = 0;
+        float _maxHeight = 2000;
+        float _minHeightFalloff = 0;
+        float _maxHeightFalloff = 0;
+        float _minAngle = 0;
+        float _maxAngle = 90;
+        float _minAngleFalloff = 0;
+        float _maxAngleFalloff = 0;
 
         Material m_Material = null;
         Editor m_TemplateMaterialEditor = null;

@@ -53,7 +53,8 @@ inline float rand_offset_with_variation_and_tendency(uint x, uint y, float diff)
 {
 	float rand = rand_float(pixel_to_seed(x, y)) - 0.5;
 	rand *= variation;
-	float diffClamped = clamp(diff, -0.5f * variation, 0.5f * variation); // cap maximum diff to 0.5
+	//float diffClamped = clamp(diff, -0.5f * variation, 0.5f * variation); // cap maximum diff to 0.5
+	float diffClamped = diff; // don't clamp diff
 	float currentFit = (1 - pow(fitExistingTerrain, iteration));
 	//float currentFit = 0;
 	//rand = diff > 0 ? max(diffClamped - currentFit, rand) : min(diffClamped + currentFit, rand);

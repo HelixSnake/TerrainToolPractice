@@ -92,18 +92,15 @@ namespace UnityEditor.Experimental.TerrainAPI
 
             float height = _heightMax / terrain.terrainData.size.y;
             float addedHeight = _addedHeight / terrain.terrainData.size.y;
-
-            if (_keepEdges)
-            {
-                int resolution = (1 << _resoMag) + 1;
-                PaintContext heightSample = PaintContext.CreateFromBounds(terrain, brushXform.GetBrushXYBounds(), terrain.terrainData.heightmapTexture.height, terrain.terrainData.heightmapTexture.width);
-                heightSample.CreateRenderTargets(Terrain.heightmapRenderTextureFormat);
-                heightSample.GatherHeightmap();
-                CreateRenderTexture(resolution);
-                Graphics.Blit(heightSample.sourceRenderTexture, _renderTexture, GetPaintMaterial(), 1);
-                heightSample.Cleanup();
-                GenerateFractal();
-            }
+            
+            int resolution = (1 << _resoMag) + 1;
+            PaintContext heightSample = PaintContext.CreateFromBounds(terrain, brushXform.GetBrushXYBounds(), terrain.terrainData.heightmapTexture.height, terrain.terrainData.heightmapTexture.width);
+            heightSample.CreateRenderTargets(Terrain.heightmapRenderTextureFormat);
+            heightSample.GatherHeightmap();
+            CreateRenderTexture(resolution);
+            Graphics.Blit(heightSample.sourceRenderTexture, _renderTexture, GetPaintMaterial(), 1);
+            heightSample.Cleanup();
+            GenerateFractal();
 
             // apply brush
             Vector4 brushParams = new Vector4(1.0f, addedHeight, height, _edgeFade);
