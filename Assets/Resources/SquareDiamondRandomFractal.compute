@@ -9,6 +9,7 @@
 #pragma kernel SquareTopSide
 #pragma kernel SquareRightSide
 #pragma kernel SquareBottomSide
+#pragma kernel TrimPeaks
 
 // Visit https://en.wikipedia.org/wiki/Diamond-square_algorithm if you need a visual aid on what this shader is doing!
 
@@ -21,21 +22,44 @@ uniform uint widthMinusOne;
 uniform uint iteration;
 uniform float variation;
 uniform bool keepEdges;
+uniform bool eliminateRidges;
 uniform float fitExistingTerrain;
+uniform float roughness;
+uniform uint trimPeaks;
 
 inline float rand_float(uint input)
 {
 	return frac(sin(dot(float2(input / 65536.0, input / 65536.0), float2(12.9898, 78.233)))*43758.5453123);
 }
 
-inline float average4(float a, float b, float c, float d)
+inline float average4(float a, float b, float c, float d, bool elimRidge)
 {
-	//return (a + b + c + d) / 4.0;
-	return (max(max(a, b), max(c, d)) + min(min(a, b), min(c, d))) / 2.0;
+	if (elimRidge)
+	{
+		float avg = (a + b + c + d) / 4.0;
+		float avg2 = (max(max(a, b), max(c, d)) + min(min(a, b), min(c, d))) / 2.0;
+		return (avg + avg2) / 2;
+	}
+	else
+	{
+		return (max(max(a, b), max(c, d)) + min(min(a, b), min(c, d))) / 2.0;
+	}
 }
-inline float average3(float a, float b, float c)
+
+inline float average3(float a, float b, float c, bool elimRidge)
 {
-	//return (a + b + c) / 3.0;
+	if (elimRidge)
+	{
+	return (a + b + c) / 3.0;
+	}
+	else
+	{
+	return (max(max(a, b), c) + min(min(a, b), c)) / 2.0;
+	}
+}
+
+inline float average3AlwaysRidge(float a, float b, float c)
+{
 	return (max(max(a, b), c) + min(min(a, b), c)) / 2.0;
 }
 
@@ -46,13 +70,13 @@ inline uint pixel_to_seed(uint x, uint y)
 
 inline float rand_offset_with_variation(uint x, uint y)
 {
-		return (rand_float(pixel_to_seed(x, y)) - 0.5) * variation;
+		return (rand_float(pixel_to_seed(x, y)) - 0.5) * variation * roughness;
 }
 
 inline float rand_offset_with_variation_and_tendency(uint x, uint y, float diff)
 {
 	float rand = rand_float(pixel_to_seed(x, y)) - 0.5;
-	rand *= variation;
+	rand *= variation * roughness;
 	//float diffClamped = clamp(diff, -0.5f * variation, 0.5f * variation); // cap maximum diff to 0.5
 	float diffClamped = diff; // don't clamp diff
 	float currentFit = (1 - pow(fitExistingTerrain, iteration));
@@ -100,12 +124,12 @@ void Diamond(uint3 id : SV_DispatchThreadID)
 	float average = average4(sample_read(newXY.x - units, newXY.y - units), \
 							sample_read(newXY.x + units, newXY.y - units), \
 							sample_read(newXY.x - units, newXY.y + units), \
-							sample_read(newXY.x + units, newXY.y + units));
+							sample_read(newXY.x + units, newXY.y + units), \
+							eliminateRidges);
 
 	float target = average + rand_offset_with_variation_and_tendency(newXY.x, newXY.y, read[newXY] - average);
 	write[newXY] = target;
 }
-
 
 [numthreads(4, 8, 1)]
 void Square(uint3 id : SV_DispatchThreadID) 
@@ -117,12 +141,12 @@ void Square(uint3 id : SV_DispatchThreadID)
 	float average = average4(sample_read(newXY.x - units, newXY.y), \
 							sample_read(newXY.x + units, newXY.y), \
 							sample_read(newXY.x, newXY.y - units), \
-							sample_read(newXY.x, newXY.y + units));
+							sample_read(newXY.x, newXY.y + units), \
+							eliminateRidges);
 
 	float target = average + rand_offset_with_variation_and_tendency(newXY.x, newXY.y, read[newXY] - average);
 	write[newXY] = target;
 }
-
 
 [numthreads(1, 8, 1)]
 void SquareLeftSide(uint3 id : SV_DispatchThreadID)
@@ -137,7 +161,8 @@ void SquareLeftSide(uint3 id : SV_DispatchThreadID)
 	{
 		float average = average3(sample_read(newXY.x + units, newXY.y), \
 			sample_read(newXY.x, newXY.y - units), \
-			sample_read(newXY.x, newXY.y + units));
+			sample_read(newXY.x, newXY.y + units), \
+			eliminateRidges);
 		write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
 	}
 }
@@ -156,7 +181,8 @@ void SquareTopSide(uint3 id : SV_DispatchThreadID)
 	{
 		float average = average3(sample_read(newXY.x - units, newXY.y), \
 			sample_read(newXY.x + units, newXY.y), \
-			sample_read(newXY.x, newXY.y + units));
+			sample_read(newXY.x, newXY.y + units), \
+			eliminateRidges);
 		write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
 	}
 }
@@ -175,7 +201,8 @@ void SquareRightSide(uint3 id : SV_DispatchThreadID)
 	{
 		float average = average3(sample_read(newXY.x - units, newXY.y), \
 			sample_read(newXY.x, newXY.y - units), \
-			sample_read(newXY.x, newXY.y + units));
+			sample_read(newXY.x, newXY.y + units), \
+			eliminateRidges);
 		write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
 	}
 }
@@ -193,7 +220,31 @@ void SquareBottomSide(uint3 id : SV_DispatchThreadID)
 	{
 		float average = average3(sample_read(newXY.x - units, newXY.y), \
 			sample_read(newXY.x + units, newXY.y), \
-			sample_read(newXY.x, newXY.y - units));
+			sample_read(newXY.x, newXY.y - units), \
+			eliminateRidges);
 		write[newXY] = average + rand_offset_with_variation(newXY.x, newXY.y);
 	}
+}
+
+
+[numthreads(8, 8, 1)]
+void TrimPeaks(uint3 id : SV_DispatchThreadID)
+{
+	int leftx = max(int(id.x) - int(trimPeaks), 0);
+	int rightx = min(id.x + trimPeaks, widthMinusOne);
+	int bottomy = max(int(id.y) - int(trimPeaks), 0);
+	int topy = min(id.y + trimPeaks, widthMinusOne);
+	float average = average4(sample_read(leftx, id.y), \
+		sample_read(rightx, id.y), \
+		sample_read(id.x, bottomy), \
+		sample_read(id.x, topy), \
+		true);
+	float average2 = average4(sample_read(leftx, topy), \
+		sample_read(rightx, topy), \
+		sample_read(leftx, bottomy), \
+		sample_read(rightx, bottomy), \
+		true);
+
+	float target = (average + average2) / 2;
+	write[uint2(id.x, id.y)] = target;
 }

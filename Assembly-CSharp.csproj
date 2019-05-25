@@ -64,9 +64,21 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\TerrainTools\TerrainToolDiamondFractal.cs" />
     <Compile Include="Assets\Scripts\TerrainTools\TerrainToolPaintLimits.cs" />
+    <None Include="Assets\TerrainToolSamples\Shaders\TerraceErosion.shader" />
+    <None Include="Assets\TerrainToolSamples\Shaders\TwistHeight.shader" />
     <None Include="Assets\Scripts\TerrainTools\Shaders\DiamondFractalHelper.shader" />
+    <None Include="Assets\TerrainToolSamples\Shaders\SmudgeHeight.shader" />
+    <None Include="Assets\TerrainToolSamples\Shaders\RidgeErode.shader" />
+    <None Include="Assets\TerrainToolSamples\Shaders\SetExactHeight.shader" />
+    <None Include="Assets\TerrainToolSamples\Shaders\PinchHeight.shader" />
     <None Include="Assets\Scripts\TerrainTools\Shaders\PaintWithLimits.shader" />
+    <None Include="Assets\TerrainToolSamples\Shaders\MeshStamp.shader" />
     <None Include="Assets\Shaders\StandardWithSnow.shader" />
+    <None Include="Assets\TerrainToolSamples\Shaders\SharpenHeight.shader" />
+    <None Include="Assets\TerrainToolSamples\Shaders\CloneBrush.shader" />
+    <None Include="Assets\TerrainToolSamples\Shaders\SlopeFlatten.shader" />
+    <None Include="Assets\TerrainToolSamples\Shaders\ErodeHeight.shader" />
+    <None Include="Assets\Materials\ScreenSpaceRefractionWithScrollingNormals.shader" />
     <None Include="Assets\Resources\SquareDiamondRandomFractal.compute" />
     <None Include="Assets\Materials\Water.shader" />
     <Reference Include="Unity.Timeline.Editor">
