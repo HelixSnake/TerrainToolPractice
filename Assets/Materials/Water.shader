@@ -87,10 +87,10 @@
         {
 			float time = _Time.x * 0.5;
 			float4 worldposv = mul(unity_ObjectToWorld, v.vertex);
-			float noiseOffset1 = tex2Dlod(_WaveNoiseMap, float4(worldposv.xz * 0.001 + time.xx, 0, 1));
+			float noiseOffset1 = tex2Dlod(_WaveNoiseMap, float4(worldposv.xz * 0.0008 + time.xx, 0, 1));
 			float noiseOffset2 = tex2Dlod(_WaveNoiseMap, float4(-worldposv.zx * 0.001 - time.xx, 0, 1));
-			float noiseOffset3 = tex2Dlod(_WaveNoiseMap, float4(-worldposv.xz * 0.001 + float2(time.x, -time.x), 0, 1));
-			float noiseOffset4 = tex2Dlod(_WaveNoiseMap, float4(worldposv.zx * 0.001 - float2(time.x, -time.x), 0, 1));
+			float noiseOffset3 = tex2Dlod(_WaveNoiseMap, float4(-worldposv.xz * 0.0012 + float2(time.x, -time.x), 0, 1));
+			float noiseOffset4 = tex2Dlod(_WaveNoiseMap, float4(worldposv.zx * 0.0014 - float2(time.x, -time.x), 0, 1));
 			float noiseOffset = (noiseOffset1 + noiseOffset2 + noiseOffset3 + noiseOffset4) * 5;
 
 			v.vertex += mul(unity_WorldToObject, float4(0, noiseOffset, 0, 0));
@@ -115,10 +115,10 @@
 			float noisetime = _Time.x * 0.5;
 
 			// normals from vertex offset noise
-			float3 noiseNormal1 = UnpackNormal(tex2Dlod(_WaveNoiseNormMap, float4(IN.worldPos.xz * 0.001 + noisetime.xx, 0, 1)));
+			float3 noiseNormal1 = UnpackNormal(tex2Dlod(_WaveNoiseNormMap, float4(IN.worldPos.xz * 0.0008 + noisetime.xx, 0, 1)));
 			float3 noiseNormal2 = UnpackNormal(tex2Dlod(_WaveNoiseNormMap, float4(-IN.worldPos.zx * 0.001 - noisetime.xx, 0, 1)));
-			float3 noiseNormal3 = UnpackNormal(tex2Dlod(_WaveNoiseNormMap, float4(-IN.worldPos.xz * 0.001 + float2(noisetime.x, -noisetime.x), 0, 1)));
-			float3 noiseNormal4 = UnpackNormal(tex2Dlod(_WaveNoiseNormMap, float4(IN.worldPos.zx * 0.001 - float2(noisetime.x, -noisetime.x), 0, 1)));
+			float3 noiseNormal3 = UnpackNormal(tex2Dlod(_WaveNoiseNormMap, float4(-IN.worldPos.xz * 0.0012 + float2(noisetime.x, -noisetime.x), 0, 1)));
+			float3 noiseNormal4 = UnpackNormal(tex2Dlod(_WaveNoiseNormMap, float4(IN.worldPos.zx * 0.0014 - float2(noisetime.x, -noisetime.x), 0, 1)));
 			float3 noiseNormal;
 			noiseNormal.xy = (noiseNormal1.xy + noiseNormal2.xy + noiseNormal3.xy + noiseNormal4.xy) * 0.1;
 			noiseNormal.z = (noiseNormal1.z * noiseNormal2.z * noiseNormal3.z * noiseNormal4.z);

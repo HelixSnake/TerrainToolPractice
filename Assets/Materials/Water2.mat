@@ -70,7 +70,7 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _Power: 1
-    - _Refraction: 1
+    - _Refraction: 4
     - _RimPower: 3
     - _ScrollXSpeed: 2
     - _ScrollYSpeed: 2

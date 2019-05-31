@@ -62,8 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\TerrainTools\TerrainToolDiamondFractal.cs" />
-    <Compile Include="Assets\Scripts\TerrainTools\TerrainToolPaintLimits.cs" />
+    <Compile Include="Assets\Scripts\ImageCreation\VoronoiCreatorTool.cs" />
     <None Include="Assets\TerrainToolSamples\Shaders\TerraceErosion.shader" />
     <None Include="Assets\TerrainToolSamples\Shaders\TwistHeight.shader" />
     <None Include="Assets\Scripts\TerrainTools\Shaders\DiamondFractalHelper.shader" />
