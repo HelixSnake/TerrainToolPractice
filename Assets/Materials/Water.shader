@@ -35,8 +35,9 @@
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 4.6
-		 #include "Tessellation.cginc"
+		#include "Tessellation.cginc"
 		#include "UnityCG.cginc"
+		#include "../Shaders/Includes/Noise.cginc"
 
 
         sampler2D _MainTex;
@@ -147,6 +148,7 @@
 			sceneZ = LinearEyeDepth(tex2D(_CameraDepthTexture, newUVs.xy));
 			float whitefade = saturate(_InvFade * 0.9 * (sceneZ - partZ));
 
+			float2 VoronoiUVs = uvs + noiseNormal.xy * 0.0;
 			o.Emission = texCUBE(_Cube, WorldReflectionVector(IN, o.Normal)).rgb * (1 - dot(o.Normal, -viewDir)) * _ReflectionColor;
 			o.Albedo.rgb = lerp(float3(0,0,0), o.Albedo.rgb, whitefade);
 			o.Emission = lerp(tex2D(_GrabTexture, newUVs.xy), o.Emission, whitefade);

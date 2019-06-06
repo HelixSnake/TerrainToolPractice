@@ -1,13 +1,10 @@
-﻿Shader "Unlit/VoronoiTest"
+﻿Shader "Unlit/PerlinNoiseTest"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-		_DistortMap("Distort Map", 2D) = "normal" {}
-		_DistortFactor("Distort Factor", Float) = 1.0
-		_CellDensity("Cell Density", Float) = 1.0
-		_Radius("Cell Radius", Float) = 3.0
-		_Speed("Movement Speed", Float) = 1.0
+		_Density("Density", Float) = 1.0
+		_Radius("Radius", Float) = 1.0
     }
     SubShader
     {
@@ -44,12 +41,8 @@
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
-			sampler2D _DistortMap;
-			float4 _DistortMap_ST;
-			float _DistortFactor;
-			float _CellDensity;
+			float _Density;
 			float _Radius;
-			float _Speed;
 
             v2f vert (appdata v)
             {
@@ -65,22 +58,15 @@
             {
                 // sample the texture
 				fixed4 col = fixed4(1, 1, 1, 1);
-				float2 DistortMapUVs = i.worldPos.xz / 100 * _DistortMap_ST.xy + float2(_Time.x, _Time.x) * _DistortMap_ST.zw;
-				float2 VoronoiUVs = i.worldPos.xz;
-				float4 distortNormalRGB = tex2D(_DistortMap, DistortMapUVs);
-				float3 distortNormal = UnpackNormal(distortNormalRGB);
-				VoronoiUVs += distortNormal.xy * _DistortFactor;
-				//float VoronoiImg = VoronoiNormalized(_CellDensity, VoronoiUVs, _Radius);
-				float VoronoiImg = VoronoiAnimated5x5Normalized(_CellDensity, VoronoiUVs, _Radius, _Speed, 0.8, 0.2);
-				col = smoothstep(0.2, 1, VoronoiImg);
-				//col.a = 1;
-				//float2 grid = smoothstep(float2(0, 0), float2(0.05, 0.05), abs(frac(VoronoiUVs * _CellDensity) - float2(0.05, 0.05)));
-				//col.rgb *= grid.x * grid.y;
-                // apply fog
+				//float noiseImg = PerlinNoise(_Density, _Radius, i.worldPos.xz);
+				float noiseImg = PerlinNoise4D(_Density, _Radius, float4(i.worldPos.xyz, _Time.y * 10));
+				col = noiseImg;
+				col.a = 1;
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
             ENDCG
         }
+		UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
     }
 }
