@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PerlinNoiseTest
-  m_Shader: {fileID: 4800000, guid: 968945f6411c65b4390ba438878c6587, type: 3}
+  m_Shader: {fileID: 4800000, guid: fd8626976b5f56a46b414268a741745b, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -67,24 +67,28 @@ Material:
     - _BumpScale: 1
     - _CellDensity: 0.1
     - _Cutoff: 0.5
-    - _Density: 0.2
+    - _Density: 0.01
     - _DetailNormalMapScale: 1
     - _DistortFactor: 5
     - _DstBlend: 0
+    - _FracMag: 0.9
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
+    - _Octaves: 10
     - _Parallax: 0.02
-    - _Radius: 0.001
+    - _Radius: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _Speed: 10
+    - _Speed: 20
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color1: {r: 1, g: 1, b: 1, a: 1}
+    - _Color2: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

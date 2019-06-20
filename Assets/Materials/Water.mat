@@ -95,7 +95,7 @@ Material:
     - _InvFade: 0.05
     - _Metallic: 0.149
     - _Mode: 0
-    - _NormalHeight: 0.01
+    - _NormalHeight: 0.02
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
@@ -104,7 +104,7 @@ Material:
     - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _Speed: 0.1
+    - _Speed: 0.2
     - _SrcBlend: 1
     - _Surface: 0
     - _Tess: 128

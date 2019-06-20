@@ -2,9 +2,16 @@
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        //_MainTex ("Texture", 2D) = "white" {}
 		_Density("Density", Float) = 1.0
 		_Radius("Radius", Float) = 1.0
+		_Speed("Speed", Float) = 1.0
+		_Octaves("Octaves", Int) = 8
+		_FracMag("FractalMagnitude", Range(0, 1)) = 0.5
+			[HDR]
+		_Color1("Color 1", Color) = (1, 1, 1, 1)
+			[HDR]
+		_Color2("Color 2", Color) = (0, 0, 0, 1)
     }
     SubShader
     {
@@ -43,6 +50,12 @@
             float4 _MainTex_ST;
 			float _Density;
 			float _Radius;
+			float _Speed;
+			float _FracMag;
+			float4 _Color1;
+			float4 _Color2;
+			int _Octaves;
+			
 
             v2f vert (appdata v)
             {
@@ -59,8 +72,20 @@
                 // sample the texture
 				fixed4 col = fixed4(1, 1, 1, 1);
 				//float noiseImg = PerlinNoise(_Density, _Radius, i.worldPos.xz);
-				float noiseImg = PerlinNoise4D(_Density, _Radius, float4(i.worldPos.xyz, _Time.y * 10));
-				col = noiseImg;
+				float scaledTime = _Time.y * _Speed;
+				float noiseImg = 0;
+				float densityMult = 1;
+				float magnitude = 1;
+				int clampedOctaves = min(_Octaves, 30);
+				for (int j = 0; j < clampedOctaves; j++)
+				{
+					noiseImg += PerlinNoise4D(_Density * densityMult, _Radius, float4(i.worldPos.xyz, scaledTime)) * magnitude;
+					densityMult *= 2;
+					magnitude *= _FracMag;
+				}
+				noiseImg = (noiseImg + 1) / 2;
+				noiseImg = saturate(noiseImg);
+				col = lerp(_Color1, _Color2, noiseImg);
 				col.a = 1;
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
