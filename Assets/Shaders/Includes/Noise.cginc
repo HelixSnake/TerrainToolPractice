@@ -110,6 +110,51 @@ inline float Voronoi(float cellDensity, float2 UV, float radius)
 	return returnValue;
 }
 
+inline float VoronoiWithDir(float cellDensity, float2 UV, float radius, out float2 direction)
+{
+	direction = float2(0, 0);
+	float oneDivCellDensity = 1.0 / cellDensity;
+	float2 uvTimesCellDens = UV * cellDensity;
+	float minDistance = radius;
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			int2 cell = floor(uvTimesCellDens) + int2(i - 1, j - 1);
+			float2 cellValue = hash22(cell);
+			cellValue = (cellValue + (float2)cell) * oneDivCellDensity;
+			float currentDist = distance(UV, cellValue);
+			UNITY_FLATTEN
+			if (minDistance > currentDist)
+			{
+				minDistance = currentDist;
+				direction = normalize(cellValue - UV);
+			}
+		}
+	}
+	float returnValue = saturate(minDistance / radius);
+	return returnValue;
+}
+
+inline float VoronoiCornerTest(float cellDensity, float2 UV, float radius)
+{
+	float oneDivCellDensity = 1.0 / cellDensity;
+	float2 uvTimesCellDens = UV * cellDensity;
+	float minDistance = radius;
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			int2 cell = floor(uvTimesCellDens) + int2(i - 1, j - 1);
+			float2 cellValue = (round(hash22(cell))-0.5)*0.7+0.5;
+			cellValue = (cellValue + (float2)cell) * oneDivCellDensity;
+			minDistance = min(minDistance, distance(UV, cellValue));
+		}
+	}
+	float returnValue = saturate(minDistance / radius);
+	return returnValue;
+}
+
 inline float Voronoi3D(float cellDensity, float3 pos, float radius)
 {
 	float oneDivCellDensity = 1.0 / cellDensity;
@@ -372,59 +417,85 @@ inline float VoronoiNormalized(float cellDensity, float2 UV, float radius)
 	return returnValue;
 }
 
-inline float VoronoiNormalized2(float cellDensity, float2 UV, float radius)
+inline bool VoronoiNormalized2HelperFunction(int point1ind, int point2ind, float2 UV, float2 points[9], out float dist, out float2 dir)
+{
+	float2 point1 = points[point1ind];
+	float2 point2 = points[point2ind];
+	float2 linePoint1 = (point1 + point2) * 0.5;
+	float2 linePointVector = normalize(point1 - point2);
+	float distanceToLine = -dot(UV - linePoint1, linePointVector);
+	float2 pointOnLine = UV + distanceToLine * linePointVector;
+	dist = abs(distanceToLine);
+	dir = linePointVector * sign(distanceToLine);
+	bool isValid = true;
+	float dist1 = distance(pointOnLine, point1);
+	float dist2 = distance(pointOnLine, point2);
+	for (int m = 0; m < 9; m++)
+	{
+		float distanceToPoint = distance(pointOnLine, points[m]);
+		isValid = isValid && (distanceToPoint >= dist1 || distanceToPoint >= dist2);
+	}
+	return isValid;
+}
+
+inline float VoronoiNormalized2(float cellDensity, float2 UV, float radius, out float2 direction)
 {
 	float oneDivCellDensity = 1.0 / cellDensity;
 	float2 points[9];
-	for (int i = 0; i < 3; i++)
+	int i;
+	int j;
+	int k;
+	int l;
+	for (i = 0; i < 3; i++)
 	{
-		for (int j = 0; j < 3; j++)
+		for (j = 0; j < 3; j++)
 		{
 			int2 cell = floor(UV * cellDensity) + int2(i - 1, j - 1);
-			float2 cellValue = hash22(cell);
+			float2 cellValue = ((hash22(cell)) - 0.5)*0.6 + 0.5;
 			cellValue = (cellValue + (float2)cell) * oneDivCellDensity;
 			points[i + j * 3] = cellValue;
 		}
 	}
-	/*for (int i = 0; i < 3; i++)
+	float closestDist = radius;
+	for (i = 0; i < 3; i++)
 	{
-		for (int j = 0; j < 2; j++)
+		for (j = 0; j < 3; j++)
 		{
-			float2 point1 = points[i + j * 3];
-			float2 point2 = points[i + (j+1) * 3];
-		}
-	}*/
-	//Horizontal center line checks
-	float2 closestPoint1 = float2(0,0);
-	float2 closestPoint2 = float2(0, 0);
-	float closestDist1 = radius * 10;
-	float closestDist2 = radius * 10;
-	//Find the three closest points
-	for (int k = 0; k < 9; k++)
-	{
-		{
-			float currentDist = distance(UV, points[k]);
-			UNITY_FLATTEN
-				if (closestDist1 > currentDist)
+			for (k = 0; k < 3; k++)
+			{
+				for (l = 0; l < 3; l++)
 				{
-					closestDist2 = closestDist1;
-					closestDist1 = currentDist;
-					closestPoint2 = closestPoint1;
-					closestPoint1 = points[k];
+					if (i == k && j == l) break;
+					//if (abs(i - k) > 1 || abs(j - l) > 1) break;
+					int point1ind = i + j * 3;
+					int point2ind = k + l * 3;
+					float dist;
+					float2 dir;
+					bool lineIsValid = VoronoiNormalized2HelperFunction(point1ind, point2ind, UV, points, dist, dir);
+					UNITY_FLATTEN
+					if (lineIsValid)
+					{
+						UNITY_FLATTEN
+						if (closestDist > dist)
+						{
+							direction = dir;
+							closestDist = dist;
+						}
+					}
 				}
-				else if (closestDist2 > currentDist)
-				{
-					closestDist2 = currentDist;
-					closestPoint2 = points[k];
-				}
+			}
 		}
 	}
-	// Find the distance from the line from the midpoint between closest points 1 and 2, and the midpoint bectween closest points 1 and 3
-	float2 linePoint1 = (closestPoint1 + closestPoint2) * 0.5;
-	float2 linePointVector = normalize(closestPoint2 - closestPoint1);
-	float distanceToLine = abs(dot(linePoint1 - UV, linePointVector));
-	//return saturate(distanceToLine / radius);
-	return saturate(distance(UV, closestPoint1) / radius);
+	direction = normalize(direction);
+	return saturate(closestDist / radius);
+
+	/*float minDistance = radius;
+	for (int i = 0; i < 9; i++)
+	{
+		minDistance = min(minDistance, distance(UV, points[i]));
+
+	}
+	return saturate(minDistance / radius);*/
 }
 
 #endif // NOISE_INCLUDED

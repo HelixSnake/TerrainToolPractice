@@ -85,17 +85,16 @@
 				//float VoronoiImg = VoronoiNormalized(_CellDensity, VoronoiUVs, _Radius);
 				//float VoronoiImg = VoronoiAnimated5x5Normalized(_CellDensity, VoronoiUVs, _Radius, _Speed, 0.8, 0.2);
 				float VoronoiImg = 0;
-				float densityMult = 1;
-				float magnitude = 1;
-				int clampedOctaves = min(_Octaves, 30);
 				float newRadius = _Radius / _CellDensity;
 				float divFactor = 0;
-				VoronoiImg = VoronoiNormalized2(_CellDensity, i.uv, newRadius);
-				VoronoiImg += (1 - Voronoi(_CellDensity, i.uv, newRadius / 10));
-				VoronoiImg += smoothstep(0.9, 1, VoronoiNormalized(_CellDensity, i.uv, newRadius));
-				col = lerp(_Color1, _Color2, pow(VoronoiImg, _Power));
-				float2 grid = smoothstep(float2(0, 0), float2(0.05, 0.05), abs(frac(i.uv * _CellDensity + float2(0.05, 0.05)) - float2(0.05, 0.05)));
-				col.rgb *= grid.x * grid.y;
+				float2 dir;
+				VoronoiImg = saturate(VoronoiNormalized2(_CellDensity, i.worldPos.xy, newRadius, dir));
+				VoronoiImg = min(VoronoiImg, 0.6);
+				//VoronoiImg += (1 - Voronoi(_CellDensity, i.uv, newRadius / 10));
+				//VoronoiImg += smoothstep(0.9, 1, VoronoiNormalized(_CellDensity, i.uv, newRadius));
+				col = lerp(_Color1, _Color2, VoronoiImg);
+				//float2 grid = smoothstep(float2(0, 0), float2(0.05, 0.05), abs(frac(i.uv * _CellDensity + float2(0.05, 0.05)) - float2(0.05, 0.05)));
+				//col.rgb *= grid.x * grid.y;
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
